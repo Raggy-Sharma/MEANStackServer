@@ -1,0 +1,13 @@
+{
+    "development": {
+        "PORT": 3000,
+        "MONGODB_URI": "mongodb://localhost:27017/MEANStackdb",
+        "JWT_SECRET": "SECRET1234",
+        "JWT_EXP": "30m"
+    },
+    "production":{
+        "PORT": 80,
+        "MONGODB_URI": "mongodb://xxxx/MEANStackdb",
+        "JWT_EXP": "30m"
+    }
+}
