@@ -16,10 +16,24 @@ app.use(cors());
 app.use(passport.initialize());
 app.use('/api', rtsIndex);
 
+let http = require('http');
+let server = http.Server(app);
+
+let socketIO = require('socket.io');
+let io = socketIO(server);
+
+io.of('/userProfile').on('connection', (socket) => {
+    console.log('user connected');
+
+    socket.on('new-message', (message) => {
+        console.log(message)
+        io.emit(message);
+      });
+});
 
 // error handler
 app.use((err, req, res, next) => {
-    if(err.name === 'ValidationError'){
+    if (err.name === 'ValidationError') {
         var valErrors = [];
         Object.keys(err.errors).forEach(key => valErrors.push(err.errors[key].message));
         res.status(422).send(valErrors);
@@ -27,4 +41,6 @@ app.use((err, req, res, next) => {
 })
 
 // start server
-app.listen(process.env.PORT, ()=>console.log('SERVING AT PORT: ', process.env.PORT));
+server.listen(process.env.PORT, () => {
+    console.log(`started on port: ${process.env.PORT}`);
+});
