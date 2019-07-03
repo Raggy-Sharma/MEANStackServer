@@ -23,8 +23,11 @@ let socketIO = require('socket.io');
 let io = socketIO(server);
 
 io.on('connection', (socket) => {
-    console.log('user connected');
-    io.of('/userProfile').emit('message', {'message': 'Hello world'})
+    socket.on('userName', (userName)=>{
+    console.log('user connected', userName);
+    })
+    io.of('/userProfile/raggy28').emit('message', {'message': 'Hello world'})
+
 });
 
 // error handler
