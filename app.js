@@ -22,13 +22,9 @@ let server = http.Server(app);
 let socketIO = require('socket.io');
 let io = socketIO(server);
 
-io.of('/userProfile').on('connection', (socket) => {
+io.on('connection', (socket) => {
     console.log('user connected');
-
-    socket.on('new-message', (message) => {
-        console.log(message)
-        io.emit(message);
-      });
+    io.of('/userProfile').emit('message', {'message': 'Hello world'})
 });
 
 // error handler
