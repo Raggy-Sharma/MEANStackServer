@@ -21,14 +21,33 @@ let server = http.Server(app);
 
 let socketIO = require('socket.io');
 let io = socketIO(server);
+let users = [];
 
 io.on('connection', (socket) => {
-    socket.on('userName', (userName)=>{
-    console.log('user connected', userName);
-    })
-    io.of('/userProfile/raggy28').emit('message', {'message': 'Hello world'})
+    var userId = socket.request._query['userId'];
+    if (userId) {
+        users.push({
+            userName: userId,
+            socketId: socket.id
+        })
+        console.log('users');
+        users.forEach(element => {
+            socket.to(element.socketId).emit('message', { 'message': 'Hi ' + element.userName })
+            console.log(JSON.stringify(element))
+        });
+    }
 
+    socket.on('disconnect', () => {
+        users.forEach((element, i) => {
+            if (element.userName === userId) {
+                users.splice(i, 1);
+            }
+        });
+        console.log('users', JSON.stringify(users))
+    })
 });
+
+
 
 // error handler
 app.use((err, req, res, next) => {
