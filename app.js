@@ -23,17 +23,20 @@ let socketIO = require('socket.io');
 let io = socketIO(server);
 let users = [];
 
-io.on('connection', (socket) => {
+io.of('userProfile').on('connection', (socket) => {
     var userId = socket.request._query['userId'];
     if (userId) {
+        if(users){
+            users.forEach(element => {
+                io.of('/userProfile').to(element.socketId).emit('message', { 'message': element.userName + ' joined' })
+            });
+        }
         users.push({
             userName: userId,
             socketId: socket.id
         })
-        console.log('users');
         users.forEach(element => {
-            socket.to(element.socketId).emit('message', { 'message': 'Hi ' + element.userName })
-            console.log(JSON.stringify(element))
+            io.of('/userProfile').to(element.socketId).emit('message', { 'message': 'Hi ' + element.userName })
         });
     }
 
@@ -42,6 +45,7 @@ io.on('connection', (socket) => {
             if (element.userName === userId) {
                 users.splice(i, 1);
             }
+            io.of('/userProfile').to(element.socketId).emit('message', { 'message': element.userName + ' left' })
         });
         console.log('users', JSON.stringify(users))
     })
