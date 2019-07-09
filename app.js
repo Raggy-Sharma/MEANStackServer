@@ -22,32 +22,41 @@ let server = http.Server(app);
 let socketIO = require('socket.io');
 let io = socketIO(server);
 let users = [];
+usersList = [];
+let userLeft;
 
 io.of('userProfile').on('connection', (socket) => {
     var userId = socket.request._query['userId'];
     if (userId) {
-        if(users){
-            users.forEach(element => {
-                io.of('/userProfile').to(element.socketId).emit('message', { 'message': element.userName + ' joined' })
-            });
-        }
+        // if(users){
+        // users.forEach(element => {
+        usersList.push(userId);
+        // });
+        // }
         users.push({
             userName: userId,
             socketId: socket.id
         })
         users.forEach(element => {
-            io.of('/userProfile').to(element.socketId).emit('message', { 'message': 'Hi ' + element.userName })
+            io.of('/userProfile').to(element.socketId).emit('message', { 'message': 'Hi ' + element.userName }),
+                io.of('/userProfile').to(element.socketId).emit('onlineUsers', usersList.filter(res => res !== element.userName))
         });
     }
 
     socket.on('disconnect', () => {
         users.forEach((element, i) => {
             if (element.userName === userId) {
-                users.splice(i, 1);
+                userLeft = users.splice(i, 1);
             }
-            io.of('/userProfile').to(element.socketId).emit('message', { 'message': element.userName + ' left' })
+            // io.of('/userProfile').to(element.socketId).emit('message', { 'message': element.userName + ' left' })
         });
-        console.log('users', JSON.stringify(users))
+        usersList.forEach((element, i) => {
+            if (element === userId) {
+                usersList.splice(i, 1);
+            }
+        });
+        users.filter(res => io.of('/userProfile').to(res.socketId).emit('message', { 'message': userLeft[0].userName + ' left' }))
+        users.filter(res => io.of('/userProfile').to(res.socketId).emit('onlineUsers', usersList.filter(res2 => res2 !== res.userName)))
     })
 });
 
