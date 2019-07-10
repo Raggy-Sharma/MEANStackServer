@@ -28,11 +28,7 @@ let userLeft;
 io.of('userProfile').on('connection', (socket) => {
     var userId = socket.request._query['userId'];
     if (userId) {
-        // if(users){
-        // users.forEach(element => {
         usersList.push(userId);
-        // });
-        // }
         users.push({
             userName: userId,
             socketId: socket.id
@@ -43,12 +39,16 @@ io.of('userProfile').on('connection', (socket) => {
         });
     }
 
+    socket.on('sendTo', (message, user) => {
+        var sendToUser = users.filter(res => res.userName === user);
+        io.of('/userProfile').to(sendToUser[0].socketId).emit('message', { 'message': message })
+    })
+
     socket.on('disconnect', () => {
         users.forEach((element, i) => {
             if (element.userName === userId) {
                 userLeft = users.splice(i, 1);
             }
-            // io.of('/userProfile').to(element.socketId).emit('message', { 'message': element.userName + ' left' })
         });
         usersList.forEach((element, i) => {
             if (element === userId) {
