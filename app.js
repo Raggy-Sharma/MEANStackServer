@@ -34,14 +34,13 @@ io.of('userProfile').on('connection', (socket) => {
             socketId: socket.id
         })
         users.forEach(element => {
-            io.of('/userProfile').to(element.socketId).emit('message', { 'message': 'Hi ' + element.userName }),
-                io.of('/userProfile').to(element.socketId).emit('onlineUsers', usersList.filter(res => res !== element.userName))
+            io.of('/userProfile').to(element.socketId).emit('onlineUsers', usersList.filter(res => res !== element.userName))
         });
     }
 
     socket.on('sendTo', (message, user) => {
         var sendToUser = users.filter(res => res.userName === user);
-        io.of('/userProfile').to(sendToUser[0].socketId).emit('message', { 'message': message })
+        io.of('/userProfile').to(sendToUser[0].socketId).emit('message', message)
     })
 
     socket.on('disconnect', () => {
